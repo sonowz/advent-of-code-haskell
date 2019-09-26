@@ -1,0 +1,81 @@
+name:                PROJECTNAME
+version:             0.1.0.0
+#synopsis:
+#description:
+homepage:            https://github.com/dnsdhrj/PROJECTNAME
+license:             BSD3
+author:              SSH
+maintainer:          dnsdhrj123@gmail.com
+copyright:           MIT
+category:            learn
+extra-source-files:
+  - README.md
+
+dependencies:
+  - async
+  - base
+  - bytestring
+  - classy-prelude
+  - containers
+  - deepseq
+  - directory
+  - exceptions
+  - filepath
+  - stm
+  - text
+  - time
+  - transformers
+  - unliftio
+  - unordered-containers
+  - vector
+
+default-extensions:
+  - ApplicativeDo
+  - BangPatterns
+  - BinaryLiterals
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveAnyClass
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DerivingVia
+  - DoAndIfThenElse
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - ExplicitForAll
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - InstanceSigs
+  - KindSignatures
+  - LambdaCase
+  - MonadComprehensions
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - NoImplicitPrelude
+  - OverloadedLists
+  - OverloadedStrings
+  - ParallelListComp
+  - PartialTypeSignatures
+  - PatternGuards
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TupleSections
+  - TypeApplications
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+executables:
+  PROJECTNAME:
+    source-dirs:      src
+    main:             Main.hs
