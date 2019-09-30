@@ -1,8 +1,8 @@
-name:                PROJECTNAME
+name:                advent-of-code-haskell
 version:             0.1.0.0
 #synopsis:
 #description:
-homepage:            https://github.com/dnsdhrj/PROJECTNAME
+homepage:            https://github.com/dnsdhrj/advent-of-code-haskell
 license:             BSD3
 author:              SSH
 maintainer:          dnsdhrj123@gmail.com
@@ -76,6 +76,6 @@ default-extensions:
   - ViewPatterns
 
 executables:
-  PROJECTNAME:
+  aoc:
     source-dirs:      src
     main:             Main.hs
