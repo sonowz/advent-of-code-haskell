@@ -1,6 +1,6 @@
 module DevMain where
 
-import ClassyPrelude
+import           Relude
 
 run :: IO ()
 run = print "[dev] Hello World!"

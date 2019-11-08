@@ -1,23 +1,25 @@
 module Lib.IO where
 
-import ClassyPrelude
-import Lib.Exception (libEx_)
+import           Relude
+import           Lib.Exception                  ( libExEither_
+                                                , libEx_
+                                                )
 
 readLines :: String -> IO [Text]
-readLines filename = map clean . lines <$> readFileUtf8 filename where
+readLines filename = lines <$> readFileText filename -- where
     -- Remove CR(Carriage Return) character
-    clean = filter (/= '\r')
-readInts    = readWords_ :: Text -> [Int]
-readDoubles = readWords_ :: Text -> [Double]
-readInt     = fromMaybe libEx_ . readMay :: Text -> Int
-readDouble  = fromMaybe libEx_ . readMay :: Text -> Double
+    -- clean = filter (/= '\r')
+readInts = readWords_ @Int :: Text -> NonEmpty Int
+readDoubles = readWords_ @Double :: Text -> NonEmpty Double
+readInt = libExEither_ . readEither :: Text -> Int
+readDouble = libExEither_ . readEither :: Text -> Double
 
-printLines :: (MonoFoldable mono, Show (Element mono)) => mono -> IO ()
+printLines :: Show a => [a] -> IO ()
 printLines = mapM_ print
-printStrs = mapM_ putStrLn :: [Text] -> IO ()
-printList = putStrLn . unwords . map tshow :: [Int64] -> IO ()
+printStrs = mapM_ print :: [Text] -> IO ()
 
 -- Private Functions --
 
-readWords_ :: forall a . Read a => Text -> [a]
-readWords_ = map (fromMaybe libEx_ . readMay) . words
+readWords_ :: forall a . Read a => Text -> NonEmpty a
+readWords_ =
+    fromMaybe libEx_ . nonEmpty . map (libExEither_ . readEither) . words

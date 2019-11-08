@@ -15,12 +15,12 @@ dependencies:
   - async
   - base
   - bytestring
-  - classy-prelude
   - containers
   - deepseq
   - directory
   - exceptions
   - filepath
+  - relude
   - stm
   - text
   - time
