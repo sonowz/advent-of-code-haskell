@@ -42,6 +42,6 @@ evenDivide (toList -> l) =
 main' :: IO ()
 main' = do
     sheet <-
-        map readInts <$> readLines "inputs/Y2017/Day02.txt" :: IO Spreadsheet
+        map readInts <$> readFileLines "inputs/Y2017/Day02.txt" :: IO Spreadsheet
     print $ solve1 sheet
     print $ solve2 sheet

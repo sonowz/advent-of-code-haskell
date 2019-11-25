@@ -5,8 +5,8 @@ import           Lib.Exception                  ( libExEither_
                                                 , libEx_
                                                 )
 
-readLines :: String -> IO [Text]
-readLines filename = lines <$> readFileText filename -- where
+readFileLines :: String -> IO [Text]
+readFileLines filename = lines <$> readFileText filename -- where
     -- Remove CR(Carriage Return) character
     -- clean = filter (/= '\r')
 readInts = readWords_ @Int :: Text -> NonEmpty Int

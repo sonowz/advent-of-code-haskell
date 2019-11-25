@@ -2,7 +2,6 @@ module Y2017.Day01 where
 
 import           Relude
 import           Data.List                      ( cycle )
-import           Text.Read                      ( read )
 import           Lib.IO
 
 -----------------------
@@ -37,10 +36,9 @@ solve2 digits = sum (zipWith sameOrZero digits compareDigits)
 main' :: IO ()
 main' = do
     digits <-
-        parseDigits . fromMaybe "" . viaNonEmpty head <$> readLines
-            "inputs/Y2017/Day01.txt" :: IO [Int]
+        parseDigits <$> readFileText "inputs/Y2017/Day01.txt" :: IO [Int]
     print $ solve1 digits
     print $ solve2 digits
 
 parseDigits :: Text -> Captcha
-parseDigits = map (read . pure) . toString
+parseDigits = map (fromMaybe 0 . readMaybe . pure) . toString
