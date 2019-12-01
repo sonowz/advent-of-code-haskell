@@ -6,3 +6,13 @@ This solution aims to write elegant, production level code.
 - Use `newtype`s for better readablity and more strict typecheck
 - Use typeclasses for composability
 - Use pure functions (which never throw exception) only, except functions in input processing
+
+# 2018 Solutions
+
+Solutions in 2018 does **NOT** belong to this `stack` project.
+
+In order to build & run 2018 code, you might want to use plain `GHC`:
+```bash
+ghc Day01.hs -o Day01
+./Day01 < ../inputs/Y2018/Day01.txt
+```
