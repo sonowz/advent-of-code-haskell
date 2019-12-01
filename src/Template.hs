@@ -13,19 +13,21 @@ import Lib.IO
 -- Type declarations --
 -----------------------
 
+newtype InputType = InputType Int deriving (Read) via Int
+newtype OutputType = OutputType Int deriving (Show) via Int
 
 ------------
 -- Part 1 --
 ------------
 
-solve1 :: a -> Int
+solve1 :: [InputType] -> OutputType
 solve1 = undefined
 
 ------------
 -- Part 2 --
 ------------
 
-solve2 :: a -> Int
+solve2 :: [InputType] -> OutputType
 solve2 = undefined
 
 --------------------
@@ -34,9 +36,9 @@ solve2 = undefined
 
 main' :: IO ()
 main' = do
-    template <- parseTemplate <<$>> readFileLines "inputs/Template.txt" :: IO [Int]
-    print $ solve1 template
+    templates <- parseTemplate <<$>> readFileLines "inputs/Template.txt" :: IO [InputType]
+    print $ solve1 templates
     -- print $ solve2 template
 
-parseTemplate :: Text -> Int
+parseTemplate :: Text -> InputType
 parseTemplate = undefined
