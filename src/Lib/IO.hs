@@ -1,9 +1,7 @@
 module Lib.IO where
 
-import           Relude
-import           Lib.Exception                  ( libExEither_
-                                                , libEx_
-                                                )
+import Relude
+import Lib.Exception (libExEither_, libEx_)
 
 readFileLines :: String -> IO [Text]
 readFileLines filename = lines <$> readFileText filename -- where
@@ -20,6 +18,5 @@ printStrs = mapM_ print :: [Text] -> IO ()
 
 -- Private Functions --
 
-readWords_ :: forall a . Read a => Text -> NonEmpty a
-readWords_ =
-    fromMaybe libEx_ . nonEmpty . map (libExEither_ . readEither) . words
+readWords_ :: forall  a . Read a => Text -> NonEmpty a
+readWords_ = fromMaybe libEx_ . nonEmpty . map (libExEither_ . readEither) . words

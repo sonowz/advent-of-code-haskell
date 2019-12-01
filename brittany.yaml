@@ -1,4 +1,4 @@
 conf_layout:
-  lconfig_cols: 120
+  lconfig_cols: 100
   lconfig_indentAmount: 4
   lconfig_indentPolicy: IndentPolicyLeft

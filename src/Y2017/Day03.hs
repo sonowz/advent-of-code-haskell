@@ -1,13 +1,13 @@
 module Y2017.Day03 where
 
-import           Relude
-import           Relude.Extra.Bifunctor
-import           Relude.Extra.CallStack
-import           Relude.Extra.Foldable1
-import           Relude.Extra.Map
-import           Relude.Extra.Newtype
-import           Relude.Extra.Tuple
-import           Lib.IO
+import Relude
+import Relude.Extra.Bifunctor
+import Relude.Extra.CallStack
+import Relude.Extra.Foldable1
+import Relude.Extra.Map
+import Relude.Extra.Newtype
+import Relude.Extra.Tuple
+import Lib.IO
 
 -----------------------
 -- Type declarations --
@@ -20,8 +20,8 @@ type Pos = (Int, Int)
 ------------
 
 spiralMemory :: HashMap Int Pos
-spiralMemory = fromList $ iterate nextKeyValue (1, (0, 0)) where
-    nextKeyValue (i, (x, y)) = undefined
+spiralMemory = fromList $ iterate nextKeyValue (1, (0, 0))
+    where nextKeyValue (i, (x, y)) = undefined
 
 solve1 :: Int -> Int
 solve1 n = let (x, y) = spiralMemory !? n ?: (0, 0) in x + y

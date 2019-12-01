@@ -1,8 +1,8 @@
 module Y2017.Day01 where
 
-import           Relude
-import           Data.List                      ( cycle )
-import           Lib.IO
+import Relude
+import Data.List (cycle)
+import Lib.IO
 
 -----------------------
 -- Type declarations --
@@ -35,8 +35,7 @@ solve2 digits = sum (zipWith sameOrZero digits compareDigits)
 
 main' :: IO ()
 main' = do
-    digits <-
-        parseDigits <$> readFileText "inputs/Y2017/Day01.txt" :: IO [Int]
+    digits <- parseDigits <$> readFileText "inputs/Y2017/Day01.txt" :: IO [Int]
     print $ solve1 digits
     print $ solve2 digits
 
