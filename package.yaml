@@ -20,6 +20,7 @@ dependencies:
   - directory
   - exceptions
   - filepath
+  - parsec
   - relude
   - stm
   - text
