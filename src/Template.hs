@@ -8,6 +8,7 @@ import Relude.Extra.Map
 import Relude.Extra.Newtype
 import Relude.Extra.Tuple
 import Lib.IO
+import Lib.Types
 
 -----------------------
 -- Type declarations --
