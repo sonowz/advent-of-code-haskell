@@ -41,5 +41,8 @@ main' = do
     print $ solve1 templates
     -- print $ solve2 template
 
+replace :: Char -> Char -> String -> String
+replace a b = map (\c -> if c == a then b else c)
+
 parseTemplate :: Text -> InputType
 parseTemplate = undefined
