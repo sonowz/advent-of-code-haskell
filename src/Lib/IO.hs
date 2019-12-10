@@ -8,8 +8,10 @@ readFileLines filename = lines <$> readFileText filename -- where
     -- Remove CR(Carriage Return) character
     -- clean = filter (/= '\r')
 readInts = readWords_ @Int :: Text -> NonEmpty Int
+readIntegers = readWords_ @Integer :: Text -> NonEmpty Integer
 readDoubles = readWords_ @Double :: Text -> NonEmpty Double
 readInt = libExEither_ . readEither :: Text -> Int
+readInteger = libExEither_ . readEither :: Text -> Integer
 readDouble = libExEither_ . readEither :: Text -> Double
 
 printLines :: Show a => [a] -> IO ()
