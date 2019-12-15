@@ -22,6 +22,7 @@ dependencies:
   - filepath
   - parsec
   - relude
+  - repa
   - stm
   - text
   - time
