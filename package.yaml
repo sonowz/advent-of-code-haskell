@@ -12,6 +12,7 @@ extra-source-files:
   - README.md
 
 dependencies:
+  - algebraic-graphs
   - async
   - base
   - bytestring
