@@ -1,16 +1,13 @@
-name:                advent-of-code-haskell
-version:             0.1.0.0
-#synopsis:
-#description:
-homepage:            https://github.com/dnsdhrj/advent-of-code-haskell
-license:             BSD3
-author:              SSH
-maintainer:          dnsdhrj123@gmail.com
-copyright:           MIT
-category:            learn
+name: advent-of-code-haskell
+version: 0.1.0.0
+homepage: 'https://github.com/dnsdhrj/advent-of-code-haskell'
+license: BSD3
+author: SSH
+maintainer: dnsdhrj123@gmail.com
+copyright: MIT
+category: learn
 extra-source-files:
   - README.md
-
 dependencies:
   - algebraic-graphs
   - async
@@ -21,6 +18,7 @@ dependencies:
   - directory
   - exceptions
   - filepath
+  - hashtables
   - parsec
   - relude
   - repa
@@ -31,7 +29,6 @@ dependencies:
   - unliftio
   - unordered-containers
   - vector
-
 default-extensions:
   - ApplicativeDo
   - BangPatterns
@@ -77,8 +74,7 @@ default-extensions:
   - TypeFamilies
   - TypeSynonymInstances
   - ViewPatterns
-
 executables:
   aoc:
-    source-dirs:      src
-    main:             Main.hs
+    source-dirs: src
+    main: Main.hs
