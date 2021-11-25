@@ -1,7 +1,6 @@
 module Y2017.Day01 where
 
 import Relude
-import Data.List (cycle)
 import Lib.IO
 
 -----------------------

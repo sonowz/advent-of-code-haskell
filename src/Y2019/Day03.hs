@@ -103,7 +103,7 @@ main' = do
     print $ solve1 wires
     print $ solve2 wires
 
-unsafeRead = fromRight (error "parse error") . readEither
+unsafeRead = fromRight (error "parse error") . readEither . toString
 toTuple (x : y : _) = (x, y)
 
 parseWire :: Text -> Wire

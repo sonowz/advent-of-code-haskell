@@ -2,7 +2,7 @@ module Lib.IO where
 
 import Relude
 import Relude.Extra.Map ((!?))
-import Relude.Extra.Tuple (mapBoth)
+import Relude.Extra.Bifunctor (bimapBoth)
 import Data.List (minimum, maximum)
 import Data.Map (assocs)
 import Data.Vector (Vector)
@@ -17,9 +17,9 @@ readFileLines filename = lines <$> readFileText filename -- where
 readInts = readWords_ @Int :: Text -> NonEmpty Int
 readIntegers = readWords_ @Integer :: Text -> NonEmpty Integer
 readDoubles = readWords_ @Double :: Text -> NonEmpty Double
-readInt = libExEither_ . readEither :: Text -> Int
-readInteger = libExEither_ . readEither :: Text -> Integer
-readDouble = libExEither_ . readEither :: Text -> Double
+readInt = libExEither_ . readEither . toString :: Text -> Int
+readInteger = libExEither_ . readEither . toString :: Text -> Integer
+readDouble = libExEither_ . readEither . toString :: Text -> Double
 
 printLines :: Show a => [a] -> IO ()
 printLines = mapM_ print
@@ -31,8 +31,8 @@ showGrid grid = intercalate "\n" . map (intercalate "" . map show) $ grid'
 showMap :: (Ord pos, Pos2D pos, Show a) => Map pos a -> String -> String
 showMap m _default = intercalate "\n" . map (intercalate "") $ list  where
     xyKeys       = (unzip . map (to2DTuple . fst) $ assocs m) :: ([Int], [Int])
-    (minX, minY) = minimum `mapBoth` xyKeys
-    (maxX, maxY) = maximum `mapBoth` xyKeys
+    (minX, minY) = minimum `bimapBoth` xyKeys
+    (maxX, maxY) = maximum `bimapBoth` xyKeys
     getS pos = maybe _default show (m !? pos)
     list = [ [ getS (from2DTuple (x, y)) | x <- [minX .. maxX] ] | y <- [minY .. maxY] ]
 
@@ -40,4 +40,4 @@ showMap m _default = intercalate "\n" . map (intercalate "") $ list  where
 -- Private Functions --
 
 readWords_ :: forall  a . Read a => Text -> NonEmpty a
-readWords_ = fromMaybe libEx_ . nonEmpty . map (libExEither_ . readEither) . words
+readWords_ = fromMaybe libEx_ . nonEmpty . map (libExEither_ . readEither . toString) . words
