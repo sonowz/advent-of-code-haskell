@@ -21,7 +21,6 @@ dependencies:
   - hashtables
   - parsec
   - relude
-  - repa
   - stm
   - text
   - time
