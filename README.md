@@ -7,6 +7,13 @@ This solution aims to write elegant, production level code.
 - Use typeclasses for composability
 - Use pure functions (which never throw exception) only, except functions in input processing
 
+# Instruction
+
+```bash
+# Runs code in year 2019, day 1 with input file stored in 'inputs/' directory.
+./run.sh 2019 01
+```
+
 # 2018 Solutions
 
 Solutions in 2018 does **NOT** belong to this `stack` project.
