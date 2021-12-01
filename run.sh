@@ -9,8 +9,8 @@ fi
 YEAR=$1
 DAY=$2
 
-if ! { [ -f "src/Y$YEAR/Day$DAY.hs" ] && [ -f "inputs/Y$YEAR/Day$DAY.txt" ]; }; then
-    echo "ERROR: Y$YEAR/Day$DAY file does not exist."
+if [[ ! -f "src/Y$YEAR/Day$DAY.hs" ]]; then
+    echo "ERROR: Y$YEAR/Day$DAY.hs file does not exist."
     exit -1
 fi
 
@@ -19,6 +19,6 @@ echo ""
 
 cp src/Main.hs src/Main.hs.tmp
 sed -i "s/import Y....\.Day../import Y$YEAR.Day$DAY/" src/Main.hs
-stack run < inputs/Y$YEAR/Day$DAY.txt
+stack run
 cp src/Main.hs.tmp src/Main.hs
 rm src/Main.hs.tmp

@@ -1,14 +1,13 @@
 module Template where
 
+import Lib.IO
+import Lib.Types
 import Relude
 import Relude.Extra.Bifunctor
-import Relude.Extra.CallStack
 import Relude.Extra.Foldable1
 import Relude.Extra.Map
 import Relude.Extra.Newtype
 import Relude.Extra.Tuple
-import Lib.IO
-import Lib.Types
 
 -----------------------
 -- Type declarations --
