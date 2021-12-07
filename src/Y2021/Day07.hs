@@ -23,14 +23,18 @@ newtype Fuel = Fuel Int deriving (Show, Ord, Eq, Num) via Int
 ------------
 
 solve1 :: [Pos] -> Fuel
-solve1 crabs = alignSum  where
+solve1 crabs = alignedDistanceSum alignPos crabs calcFuel  where
     alignPos = median crabs
-    alignSum = sum $ map (calcFuel alignPos) crabs
+
+alignedDistanceSum :: Pos -> [Pos] -> (Pos -> Pos -> Fuel) -> Fuel
+alignedDistanceSum align crabs toFuel = sum $ map (toFuel align) crabs
 
 median :: Ord a => [a] -> a
-median l = (unsafeHead . drop (midIndex - 1) . sort) l  where
+median l = (getNth midIndex . sort) l  where
     midIndex   = length l `div` 2
-    unsafeHead = fromMaybe (error "Impossible!") . viaNonEmpty head
+    getNth :: Int -> [a] -> a
+    getNth n = unsafeHead . drop (n - 1)
+    unsafeHead = fromMaybe (error "No crabs!") . viaNonEmpty head
 
 calcFuel :: Pos -> Pos -> Fuel
 calcFuel a b = Fuel $ abs (un a - un b)
@@ -42,7 +46,7 @@ calcFuel a b = Fuel $ abs (un a - un b)
 solve2 :: [Pos] -> Fuel
 solve2 crabs = minimum1 alignSums'  where
     alignCandidates = [minimum1 crabs' .. maximum1 crabs'] :: [Pos]
-    alignSums       = map (\align -> sum $ map (calcFuel2 align) crabs) alignCandidates
+    alignSums       = map (\align -> alignedDistanceSum align crabs calcFuel2) alignCandidates
 
     fromJust        = fromMaybe (error "No crabs!")
     crabs'          = fromJust $ nonEmpty crabs :: NonEmpty Pos
