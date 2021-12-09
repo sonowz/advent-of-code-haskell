@@ -1,6 +1,6 @@
 module Main where
 
 import Relude
-import Y2019.Day19
+import Y2021.Day01
 main :: IO ()
 main = main'
