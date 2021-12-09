@@ -31,10 +31,7 @@ step :: FishState -> FishState
 step (FishState days) = FishState newState  where
     -- Exhaustive pattern matching, using Maybe monad
     (day0, day1to6, day7, day8) = fromJust $ do
-        (day0, day1to8) <- uncons days
-        let (day1to6, day7to8) = splitAt 6 day1to8
-        (day7, day8') <- uncons day7to8
-        (day8, _    ) <- uncons day8'
+        let (day0:day1to6, [day7, day8]) = splitAt 7 days
         return (day0, day1to6, day7, day8)
 
     fromJust = fromMaybe (error "Invalid State!")

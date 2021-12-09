@@ -32,9 +32,11 @@ type AllSeg7 = '[A , B , C , D , E , F , G]
 newSegMapping :: SegMapping '[]
 newSegMapping = SegMapping mempty
 
+-- WARNING: segs' must be explicitly typed
 insertSegMapping :: Seg7 -> Seg7 -> SegMapping segs -> SegMapping segs'
 insertSegMapping k v (SegMapping m) = SegMapping $ insert k v m
 
+-- WARNING: segs'' must be explicitly typed
 unionSegMapping :: SegMapping segs -> SegMapping segs' -> SegMapping segs''
 unionSegMapping (SegMapping m1) (SegMapping m2) = SegMapping (m1 <> m2)
 
@@ -43,6 +45,12 @@ getSegMapping k (SegMapping m) = fromMaybe (error "No mapping!") (lookup k m)
 
 inverseMapping :: SegMapping AllSeg7 -> SegMapping AllSeg7
 inverseMapping (SegMapping m) = (SegMapping . fromList . fmap swap . toPairs) m
+
+
+-- Use 'MonadFail' class in 'findX' functions
+-- This enables non-exhaustive pattern matching & prevents runtime errors
+type Failable = Either String
+-- instance MonadFail (Either String)
 
 -- Using custom operators with Sets for readability
 infixl 6 .- -- Same precedence as (+), (-)
@@ -83,54 +91,12 @@ intListToInt l = go l 0  where
     go [x     ] acc = acc + x
     go (x : xs) acc = go xs (10 * (acc + x))
 
--- TODO: delete these and make more type-safe version
-fromJust :: Maybe a -> a
-fromJust = fromMaybe (error "Invalid signals!")
-unsafeHead :: Digit -> Seg7
-unsafeHead = fromJust . viaNonEmpty head . toList
+nonEmptyFailable :: [a] -> Failable (NonEmpty a)
+nonEmptyFailable = maybeToRight "Empty list!" . nonEmpty
+
+
 unsafeFind :: (Digit -> Bool) -> [Digit] -> Digit
-unsafeFind f l = fromJust $ find f l
-
--- 'a' is found using "1" and "7"
-findA :: [Digit] -> SegMapping '[A]
-findA s = insertSegMapping A a newSegMapping where a = unsafeHead $ digit7 s .- digit1 s
-
--- 'd' is found using "235" and "4"
-findD :: [Digit] -> SegMapping '[D]
-findD s = insertSegMapping D d newSegMapping  where
-    adg = foldl1' (∩) (fromJust $ nonEmpty $ digit235 s)
-    d   = unsafeHead $ adg ∩ digit4 s
-
--- 'b' is found using "1", "4", and 'd'
-findB :: [Digit] -> SegMapping '[D] -> SegMapping '[B , D]
-findB s m = insertSegMapping B b m  where
-    d  = getSegMapping D m
-    bd = digit4 s .- digit1 s
-    b  = unsafeHead $ bd .- one d
-
--- 'c' and 'f' is found using "1" and "069"
-findCF :: [Digit] -> SegMapping '[C , F]
-findCF s = insertSegMapping F f . insertSegMapping C c $ newSegMapping  where
-    abfg = foldl1' (∩) (fromJust $ nonEmpty $ digit069 s)
-    cf   = digit1 s
-    f    = unsafeHead $ abfg ∩ cf
-    c    = unsafeHead $ cf .- one f
-
--- 'g' is found using "235", 'a', and 'd'
-findG :: [Digit] -> SegMapping '[A , D] -> SegMapping '[A , D , G]
-findG s m = insertSegMapping G g m  where
-    a   = getSegMapping A m
-    d   = getSegMapping D m
-    adg = foldl1' (∩) (fromJust $ nonEmpty $ digit235 s)
-    g   = unsafeHead $ adg .- fromList [a, d]
-
--- 'e' is found by pigeonhole principle
-findE :: SegMapping '[A , B , C , D , F , G] -> SegMapping AllSeg7
-findE m = insertSegMapping E e m  where
-    allSegs   = fromList [A .. G] :: Set Seg7
-    otherSegs = fromList $ map (`getSegMapping` m) [A, B, C, D, F, G] :: Set Seg7
-    e         = unsafeHead $ allSegs .- otherSegs
-
+unsafeFind f l = fromMaybe (error "No find result!") $ find f l
 digit1 :: [Digit] -> Digit
 digit1 = unsafeFind ((== 2) . length)
 digit4 :: [Digit] -> Digit
@@ -142,16 +108,64 @@ digit235 = filter ((== 5) . length)
 digit069 :: [Digit] -> [Digit]
 digit069 = filter ((== 6) . length)
 
+-- 'a' is found using "1" and "7"
+findA :: [Digit] -> Failable (SegMapping '[A])
+findA s = do
+    let [a] = digit7 s .- digit1 s
+    return $ insertSegMapping A a newSegMapping
+
+-- 'd' is found using "235" and "4"
+findD :: [Digit] -> Failable (SegMapping '[D])
+findD s = do
+    adg <- foldl1' (∩) <$> nonEmptyFailable (digit235 s)
+    let [d] = adg ∩ digit4 s
+    return $ insertSegMapping D d newSegMapping
+
+-- 'b' is found using "1", "4", and 'd'
+findB :: [Digit] -> SegMapping '[D] -> Failable (SegMapping '[B , D])
+findB s m = do
+    let d   = getSegMapping D m
+        bd  = digit4 s .- digit1 s
+        [b] = bd .- one d
+    return $ insertSegMapping B b m
+
+-- 'c' and 'f' is found using "1" and "069"
+findCF :: [Digit] -> Failable (SegMapping '[C , F])
+findCF s = do
+    abfg <- foldl1' (∩) <$> nonEmptyFailable (digit069 s)
+    let cf  = digit1 s
+        [f] = abfg ∩ cf
+        [c] = cf .- one f
+    return $ insertSegMapping F f . insertSegMapping C c $ newSegMapping
+
+-- 'g' is found using "235", 'a', and 'd'
+findG :: [Digit] -> SegMapping '[A , D] -> Failable (SegMapping '[A , D , G])
+findG s m = do
+    adg <- foldl1' (∩) <$> nonEmptyFailable (digit235 s)
+    let a   = getSegMapping A m
+        d   = getSegMapping D m
+
+        [g] = adg .- fromList [a, d]
+    return $ insertSegMapping G g m
+
+-- 'e' is found by pigeonhole principle
+findE :: SegMapping '[A , B , C , D , F , G] -> Failable (SegMapping AllSeg7)
+findE m = do
+    let allSegs   = fromList [A .. G] :: Set Seg7
+        otherSegs = fromList $ map (`getSegMapping` m) [A, B, C, D, F, G] :: Set Seg7
+        [e]       = allSegs .- otherSegs
+    return $ insertSegMapping E e m
+
 findSegMapping :: [Digit] -> SegMapping AllSeg7
-findSegMapping digits = abcdefg  where
-    a       = findA digits
-    d       = findD digits
-    bd      = findB digits d
-    cf      = findCF digits
-    adg     = findG digits (unionSegMapping a d)
-    abdg    = unionSegMapping adg bd :: SegMapping '[A , B , D , G]
-    abcdfg  = unionSegMapping abdg cf
-    abcdefg = findE abcdfg
+findSegMapping digits = either (error . toText) id $ do
+    a   <- findA digits
+    d   <- findD digits
+    bd  <- findB digits d
+    cf  <- findCF digits
+    adg <- findG digits (unionSegMapping a d)
+    let abdg   = unionSegMapping adg bd :: SegMapping '[A , B , D , G]
+        abcdfg = unionSegMapping abdg cf
+    findE abcdfg
 
 decodeDigit :: SegMapping AllSeg7 -> Digit -> Int
 decodeDigit mapping digit = readDigit mappedDigit  where
