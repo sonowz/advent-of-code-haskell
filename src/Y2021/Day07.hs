@@ -33,7 +33,7 @@ median :: Ord a => [a] -> a
 median l = (getNth midIndex . sort) l  where
     midIndex   = length l `div` 2
     getNth :: Int -> [a] -> a
-    getNth n = unsafeHead . drop (n - 1)
+    getNth n = unsafeHead . drop n
     unsafeHead = fromMaybe (error "No crabs!") . viaNonEmpty head
 
 calcFuel :: Pos -> Pos -> Fuel
