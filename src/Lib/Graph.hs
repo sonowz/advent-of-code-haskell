@@ -10,9 +10,7 @@ import Algebra.Graph.Labelled.AdjacencyMap
 import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
 
--- Issue: dijkstra works only in DAGs
 -- TODO: Improve documentation for 'dijkstra'.
--- TODO: Improve performance
 -- | A generic Dijkstra algorithm that relaxes the list of edges
 -- based on the 'Dioid'. 
 --
@@ -66,17 +64,18 @@ import qualified Data.Map.Strict as Map
 -- dijkstra ('edges' [(5, 'a', 'c'), (3, 'a', 'b'), (1, 'b', 'c')]) 'a' == 'Map.fromList' [('a', 'one'), ('b', 3), ('c', 5)]
 -- dijkstra ('edges' [(5, 'a', 'c'), (3, 'a', 'b'), (1, 'b', 'c')]) 'z' == 'Map.fromList' [('a', 'zero'), ('b', 'zero'), ('c', 'zero')]
 -- @
-dijkstra :: (Ord a, Ord e, Dioid e) => AdjacencyMap e a -> a -> Map a e
+dijkstra :: forall a e . (Ord a, Ord e, Dioid e) => AdjacencyMap e a -> a -> Map a e
 dijkstra = dijkstra' zero one
   where
     dijkstra' :: (Ord a, Ord e, Dioid e) => e -> e -> AdjacencyMap e a -> a -> Map a e
-    dijkstra' z o wam src = maybe zm (snd . processG) jsm
+    dijkstra' z o wam src = maybe zm ((\(_, m, _) -> m) . processG) jsm
       where
         am = adjacencyMap wam
-        zm = Map.map (const zero) am
-        im = Map.insert src one zm
-        is = Set.singleton (one, src)
-        jsm = (is, im) <$ Map.lookup src zm
+        zm = Map.map (const zero) am  :: Map a e
+        im = Map.insert src one zm    :: Map a e    -- queue (reverse lookup)
+        is = Set.singleton (one, src) :: Set (e, a) -- queue
+        vs = Set.singleton src        :: Set a      -- visited
+        jsm = (is, im, vs) <$ Map.lookup src zm
         view
             | o <+> z == o =
                 if o < z
@@ -87,15 +86,17 @@ dijkstra = dijkstra' zero one
                     then Set.maxView
                     else Set.minView
             | otherwise = Set.minView
-        processG sm@(s, _) = processS (view s) sm
+        processG sm@(s, _, _) = processS (view s) sm
         processS Nothing sm = sm
-        processS (Just ((_, v1), s)) (_, m) = processG $ relaxV v1 (s, m)
+        processS (Just ((_, v1), s)) (_, m, v) = processG $ relaxV v1 (s, m, v)
         relaxV v1 sm =
             let eL = map (\(v2, e) -> (e, v1, v2)) . Map.toList $ am ! v1
-             in foldr relaxE sm eL
-        relaxE (e, v1, v2) (s, m) =
+             in foldl' relaxE sm eL
+        relaxE (s, m, visit) (e, v1, v2) =
             let n = ((m ! v1) <.> e) <+> (m ! v2)
-             in (Set.insert (n, v2) s, Map.insert v2 n m)
+             in if v2 `Set.member` visit
+                then (s, m, visit)
+                else (Set.insert (n, v2) s, Map.insert v2 n m, Set.insert v2 visit)
 
 -- TODO: Improve documentation for bellmanFord
 -- TODO: Improve performance
