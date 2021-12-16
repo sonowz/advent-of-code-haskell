@@ -11,8 +11,7 @@ import Relude.Extra.Tuple
 import qualified Relude.Unsafe as Unsafe
 import Text.Parsec.Combinator
 import Text.Parsec.Pos (SourcePos, incSourceColumn, sourceColumn)
-import Text.Parsec.Prim
-import qualified Text.Parsec.Prim as P
+import Text.Parsec.Prim hiding ((<|>), many)
 import qualified Text.Show as S
 
 -----------------------
@@ -20,11 +19,29 @@ import qualified Text.Show as S
 -----------------------
 
 data Binary = Zero | One deriving (Eq, Ord, Show)
+
+-- Denotes just a stream of binaries
 type BinStream = [Binary]
+
+-- Denotes a number represented as binaries
 newtype BinNumber = BN [Binary] deriving (Semigroup, Monoid) via [Binary]
+
+data Packet
+    = LiteralPacket Version BinNumber
+    | OperatorPacket Version PacketOp [Packet]
+    deriving (Show)
+newtype Version = Version Int deriving (Show)
+newtype PacketID = PacketId Int deriving (Show)
+data PacketOp = OpSum | OpProduct | OpMin | OpMax | OpGT | OpLT | OpEQ deriving (Show)
+
+-- This solution uses 'parsec' library
+-- in order to parse 'BinStream' (= '[Binary]') type into 'Packet' type
+type Parser' = Parsec BinStream ()
+
 type HexNum = Text
 
 instance S.Show BinNumber where
+    -- This also shows number as integer
     show n = "(" <> intForm n <> ") " <> binForm (un n)      where
         intForm = show . binToInt
         binForm []          = ""
@@ -60,15 +77,6 @@ hexToBin = toString >=> parseBin  where
     parseBin c   = pad4 . un . intToBin . readInt . toText $ ([c] :: String)
         where pad4 l = replicate (4 - length l) Zero <> l
 
-
-data Packet
-    = LiteralPacket Version BinNumber
-    | OperatorPacket Version PacketOp [Packet]
-    deriving (Show)
-newtype Version = Version Int deriving (Show)
-newtype PacketID = PacketId Int deriving (Show)
-data PacketOp = OpSum | OpProduct | OpMin | OpMax | OpGT | OpLT | OpEQ deriving (Show)
-
 intToOp :: Int -> PacketOp
 intToOp 0 = OpSum
 intToOp 1 = OpProduct
@@ -79,8 +87,6 @@ intToOp 6 = OpLT
 intToOp 7 = OpEQ
 intToOp _ = error "Invalid operator!"
 
-type Parser' = Parsec BinStream ()
-
 ------------
 -- Part 1 --
 ------------
@@ -89,8 +95,7 @@ solve1 :: BinStream -> Int
 solve1 = sumVersionNumbers . parsePacket
 
 parsePacket :: BinStream -> Packet
-parsePacket packetStream =
-    fromRight (error "parse error") $ parse pPacketWithZeroPadding "" packetStream
+parsePacket packetStream = fromRight (error "parse error") $ parse pPacketAligned "" packetStream
 
 sumVersionNumbers :: Packet -> Int
 sumVersionNumbers (LiteralPacket (Version v) _) = v
@@ -124,10 +129,16 @@ pBinNumber = fmap BN . pBinStream
 
 -- Composite parsers --
 
--- TODO: verify that packet is 4-aligned
-pPacketWithZeroPadding :: Parser' Packet
-pPacketWithZeroPadding = pPacket <* P.many pZero
+-- 4-bit aligned packet
+pPacketAligned :: Parser' Packet
+pPacketAligned = do
+    packet <- pPacket
+    column <- sourceColumn <$> getPosition :: Parser' Int
+    let padding = (column - 1) `mod` 4
+    replicateM_ padding pZero
+    return packet
 
+-- Not aligned packet
 pPacket :: Parser' Packet
 pPacket = do
     version    <- Version . binToInt <$> pBinNumber 3
@@ -144,7 +155,7 @@ pLiteralPacket version = LiteralPacket version . BN <$> pValue  where
 
 pOperatorPacket :: Version -> Int -> Parser' Packet
 pOperatorPacket version packetType = do
-    subpackets <- try pTotalLength P.<|> try pSubpacketLength
+    subpackets <- try pTotalLength <|> try pSubpacketLength
     return (OperatorPacket version (intToOp packetType) subpackets)
   where
     pTotalLength = do
