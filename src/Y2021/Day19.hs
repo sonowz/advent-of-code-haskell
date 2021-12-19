@@ -70,7 +70,8 @@ findJust f l = do
     foldl' (<|>) hd tl
 
 
--- If establish succeeds, return with coordinates aligned with 'sr1'
+-- If establish succeeds, return with second ScanResult
+-- whose coordinates are aligned with first ScanResult
 tryEstablish :: ScanResult -> ScanResult -> Maybe ScanResult
 tryEstablish (ScanResult _ _ bc1) (ScanResult sid2 _ bc2) = findJust findFn matchCases  where
     findFn (sr1', sr2') = uncurry (ScanResult sid2) <$> tryEstablishWithOrientation sr1' sr2'
@@ -78,19 +79,19 @@ tryEstablish (ScanResult _ _ bc1) (ScanResult sid2 _ bc2) = findJust findFn matc
     matchCases = zip (repeat bc1) (transpose (orientations <$> bc2))
 
     tryEstablishWithOrientation :: [BeaconPos] -> [BeaconPos] -> Maybe (ScannerPos, [BeaconPos])
-    tryEstablishWithOrientation sr1 sr2 = findJust has12Matchings firstMatchCases      where
-        firstMatchCases = [ (p1, p2) | p1 <- sr1, p2 <- sr2 ]
-        -- 'mp1' means matching point in 'sr1'
+    tryEstablishWithOrientation bc1 bc2 = findJust has12Matchings firstMatchCases      where
+        firstMatchCases = [ (p1, p2) | p1 <- bc1, p2 <- bc2 ]
+        -- 'mp1' means matching point in first ScanResult
         has12Matchings :: (BeaconPos, BeaconPos) -> Maybe (ScannerPos, [BeaconPos])
         has12Matchings (mp1, mp2) = if length matchings >= 12
-            then Just (toScannerPos sc2Aligned, toList sr2Aligned) -- aligned coordinates
+            then Just (toScannerPos sc2Aligned, toList bc2Aligned) -- aligned coordinates
             else Nothing
           where
-            sr1'       = fromList sr1 :: Set BeaconPos
-            -- since mp1 and mp2 are same position, align sr2 by subtracting offest between mp1 and mp2
+            bc1'       = fromList bc1 :: Set BeaconPos
+            -- since mp1 and mp2 are same position, align bc2 by adding aligned sc2
             sc2Aligned = mp1 - mp2 :: BeaconPos
-            sr2Aligned = fromList $ (+ sc2Aligned) <$> sr2 :: Set BeaconPos
-            matchings  = S.intersection sr1' sr2Aligned :: Set BeaconPos
+            bc2Aligned = fromList $ (+ sc2Aligned) <$> bc2 :: Set BeaconPos
+            matchings  = S.intersection bc1' bc2Aligned :: Set BeaconPos
             toScannerPos (BeaconPos x) = ScannerPos x
 
 
@@ -156,6 +157,7 @@ alignAll start graph = fstSnd $ go (A.adjacencyMap graph) start start mempty  wh
                 (childScanners', childBeacons', visit') = go graph v vAligned' visit
             in (childScanners <> childScanners', childBeacons <> childBeacons', visit')
 
+
 ------------
 -- Part 2 --
 ------------
@@ -169,6 +171,7 @@ solve2 graph scanResults = viaNonEmpty maximum1 distances ?: 0  where
 manhattanD :: ScannerPos -> ScannerPos -> Int
 manhattanD (ScannerPos (x1, y1, z1)) (ScannerPos (x2, y2, z2)) =
     abs (x1 - x2) + abs (y1 - y2) + abs (z1 - z2)
+
 
 --------------------
 -- Main & Parsing --
