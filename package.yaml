@@ -68,6 +68,7 @@ default-extensions:
   - RecordWildCards
   - ScopedTypeVariables
   - StandaloneDeriving
+  - StrictData
   - TupleSections
   - TypeApplications
   - TypeFamilies
