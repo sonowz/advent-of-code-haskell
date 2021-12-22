@@ -114,8 +114,10 @@ calcPowerOnVolume = sumX  where
 -- Part 2 --
 ------------
 
--- WARNING! This solution takes about ~2 minutes and requires ~20GB RAM.
--- TODO: do not mutate the 'CompVoxel' in 'runStep' and use 'STRef'
+-- WARNING! This solution takes about ~2 minutes and may require ~20GB RAM.
+-- I did an experiment with 'STRef' to prevent mutation of 'CompVoxel' to gain performance,
+--   but it took more time and RAM...
+-- The only way to enhance performance looks like changing 'Map' into 'sorted Vector'.
 
 solve2 :: [RebootStep] -> Integer
 solve2 rebootSteps = calcPowerOnVolume voxel  where
