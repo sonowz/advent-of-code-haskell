@@ -98,6 +98,53 @@ dijkstra = dijkstra' zero one
                 then (s, m, visit)
                 else (Set.insert (n, v2) s, Map.insert v2 n m, Set.insert v2 visit)
 
+
+-- Returns shortest distance and path (e, [a]) for all reachable nodes
+shortestPath :: forall a e . (Ord a, Ord e, Dioid e) => AdjacencyMap e a -> a -> Map a (e, [a])
+shortestPath = dijkstra' zero one
+  where
+    dijkstra' :: (Ord a, Ord e, Dioid e) => e -> e -> AdjacencyMap e a -> a -> Map a (e, [a])
+    dijkstra' z o wam src = maybe zm' ((\(_, m, _, ps) -> genPath m ps) . processG) jsm
+      where
+        am = adjacencyMap wam
+        zm = Map.map (const zero) am  :: Map a e
+        zm' = Map.map (const zero) am  :: Map a (e, [a])
+        im = Map.insert src one zm    :: Map a e    -- queue (reverse lookup)
+        is = Set.singleton (one, src) :: Set (e, a) -- queue
+        vs = Set.singleton src        :: Set a      -- visited
+        ps = mempty                   :: Map a a    -- parents
+        jsm = (is, im, vs, ps) <$ Map.lookup src zm
+        view
+            | o <+> z == o =
+                if o < z
+                    then Set.minView
+                    else Set.maxView
+            | o <+> z == z =
+                if o < z
+                    then Set.maxView
+                    else Set.minView
+            | otherwise = Set.minView
+        processG sm@(s, _, _, _) = processS (view s) sm
+        processS Nothing sm = sm
+        processS (Just ((_, v1), s)) (_, m, v, ps) = processG $ relaxV v1 (s, m, v, ps)
+        relaxV v1 sm =
+            let eL = map (\(v2, e) -> (e, v1, v2)) . Map.toList $ am ! v1
+             in foldl' relaxE sm eL
+        relaxE (s, m, visit, ps) (e, v1, v2) =
+            let n = ((m ! v1) <.> e) <+> (m ! v2)
+                ps' = if maybe True (> n) (Map.lookup v2 m) then Map.insert v2 v1 ps else ps
+             in if v2 `Set.member` visit
+                then (s, m, visit, ps)
+                else (Set.insert (n, v2) s, Map.insert v2 n m, Set.insert v2 visit, ps')
+        genPath :: Map a e -> Map a a -> Map a (e, [a])
+        genPath m ps = Map.mapWithKey mapFn m where
+          mapFn v e = (e, reverse $ unfoldr unfoldFn (Just v))  -- 'reverse' isn't good for performance..
+          unfoldFn Nothing = Nothing
+          unfoldFn (Just v) = if src == v
+            then Just (v, Nothing)
+            else Just (v, Map.lookup v ps)
+
+
 -- TODO: Improve documentation for bellmanFord
 -- TODO: Improve performance
 -- TODO: safely change 'vL' to 'tail vL' in processL
@@ -164,6 +211,7 @@ bellmanFord wam src = maybe zm processL jim
         let n = ((m ! v1) <.> e) <+> (m ! v2)
          in Map.adjust (const n) v2 m
 
+-- TODO: this algorithm is broken; fix it
 -- TODO: Improve documentation for floydWarshall
 -- TODO: Improve performance
 -- TODO: Use a strict fold
