@@ -20,6 +20,7 @@ dependencies:
   - filepath
   - hashtables
   - parsec
+  - random
   - relude
   - stm
   - text
