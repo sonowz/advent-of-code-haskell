@@ -1,5 +1,5 @@
 name: advent-of-code-haskell
-version: 0.1.0.0
+version: 1.0.0.0
 homepage: 'https://github.com/dnsdhrj/advent-of-code-haskell'
 license: BSD3
 author: SSH
@@ -8,6 +8,13 @@ copyright: MIT
 category: learn
 extra-source-files:
   - README.md
+
+language: GHC2021
+
+ghc-options:
+  - -O2
+  - -threaded
+
 dependencies:
   - algebraic-graphs
   - async
@@ -29,52 +36,27 @@ dependencies:
   - unliftio
   - unordered-containers
   - vector
+
 default-extensions:
   - ApplicativeDo
-  - BangPatterns
-  - BinaryLiterals
-  - ConstraintKinds
   - DataKinds
   - DefaultSignatures
   - DeriveAnyClass
-  - DeriveDataTypeable
-  - DeriveFoldable
-  - DeriveFunctor
-  - DeriveGeneric
-  - DeriveTraversable
   - DerivingVia
-  - DoAndIfThenElse
-  - EmptyDataDecls
-  - ExistentialQuantification
-  - ExplicitForAll
-  - FlexibleContexts
-  - FlexibleInstances
   - FunctionalDependencies
   - GADTs
-  - InstanceSigs
-  - KindSignatures
   - LambdaCase
   - MonadComprehensions
-  - MultiParamTypeClasses
-  - MultiWayIf
-  - NamedFieldPuns
   - NoImplicitPrelude
   - OverloadedLists
   - OverloadedStrings
   - ParallelListComp
   - PartialTypeSignatures
-  - PatternGuards
-  - PolyKinds
-  - RankNTypes
   - RecordWildCards
-  - ScopedTypeVariables
-  - StandaloneDeriving
   - StrictData
-  - TupleSections
-  - TypeApplications
   - TypeFamilies
-  - TypeSynonymInstances
   - ViewPatterns
+
 executables:
   aoc:
     source-dirs: src

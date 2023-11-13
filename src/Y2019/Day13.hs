@@ -18,7 +18,6 @@ import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
 import Control.Concurrent.STM.TChan
 import qualified Text.Show as S
-import System.IO (hSetBuffering, BufferMode(..))
 import Lib.Types
 import Lib.IO
 import Lib.Vector2D
