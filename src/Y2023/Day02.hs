@@ -1,6 +1,7 @@
 module Y2023.Day02 (main') where
 
 import Lib.IO
+import Lib.Parser qualified as P
 import Lib.Types
 import Relude
 import Relude.Extra.Bifunctor
@@ -84,21 +85,11 @@ parserGameResult = do
 
 parserRevealSet :: Parser RevealSet
 parserRevealSet = do
-  reveals <- fromList <$> sepBy1 parserReveal (string ", ") :: Parser (Map CubeColor Int)
+  reveals <- fromList . fmap swap <$> sepBy1 parserReveal (string ", ") :: Parser (Map CubeColor Int)
   return $ RevealSet (\color -> fromMaybe 0 (reveals !? color))
 
-parserReveal :: Parser (CubeColor, Int)
-parserReveal = do
-  count <- number
-  space
-  color <- parserColor
-  return (color, count)
+parserReveal :: Parser (Int, CubeColor)
+parserReveal = (,) <$> P.number <* space <*> parserColor
 
 parserColor :: Parser CubeColor
-parserColor = do
-  color <- choice [string "red", string "green", string "blue"]
-  return $ case color of
-    "red" -> Red
-    "green" -> Green
-    "blue" -> Blue
-    _ -> error "invalid color"
+parserColor = choice [string "red" $> Red, string "green" $> Green, string "blue" $> Blue]
