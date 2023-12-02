@@ -1,7 +1,8 @@
-module Template where
+module Template (main') where
 
 import Lib.IO
 import Lib.Types
+import qualified Lib.Parser as P
 import Relude
 import Relude.Extra.Bifunctor
 import Relude.Extra.Foldable1
@@ -39,9 +40,6 @@ main' = do
     templates <- parseTemplate <<$>> readFileLines "inputs/Template.txt" :: IO [InputType]
     print $ solve1 templates
     -- print $ solve2 template
-
-replace :: Char -> Char -> String -> String
-replace a b = map (\c -> if c == a then b else c)
 
 parseTemplate :: Text -> InputType
 parseTemplate = undefined

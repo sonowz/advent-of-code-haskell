@@ -3,6 +3,7 @@ module Y2023.Day02 (main') where
 import Lib.IO
 import Lib.Parser qualified as P
 import Lib.Types
+import qualified Lib.Parser as P
 import Relude
 import Relude.Extra.Bifunctor
 import Relude.Extra.Foldable1
@@ -20,7 +21,7 @@ import Text.Parsec.Text
 
 data GameResult = GameResult
   { gameId :: Int,
-    revealSets :: [RevealSet]
+    revealSets :: NonEmpty RevealSet
   }
 
 newtype RevealSet = RevealSet (CubeColor -> Int)
@@ -55,9 +56,8 @@ mergeRevealSet (RevealSet reveal1) (RevealSet reveal2) = RevealSet $ \color -> m
 calcCubePower :: GameResult -> Int
 calcCubePower gameResult = cubePower
   where
-    mergedRevealSet = foldl1' mergeRevealSet (nonEmpty' $ revealSets gameResult)
+    mergedRevealSet = foldl1' mergeRevealSet (revealSets gameResult)
     cubePower = product $ un mergedRevealSet <$> (universe :: [CubeColor])
-    nonEmpty' = fromMaybe (error "empty list") . nonEmpty
 
 --------------------
 -- Main & Parsing --
@@ -72,15 +72,12 @@ main' = do
 parseGameResult :: Text -> GameResult
 parseGameResult = either (error . show) id . parse parserGameResult ""
 
-number :: Parser Int
-number = readInt . toText <$> many1 digit
-
 parserGameResult :: Parser GameResult
 parserGameResult = do
   string "Game "
-  gameId <- number
+  gameId <- P.number
   string ": "
-  revealSets <- sepBy1 parserRevealSet (string "; ")
+  revealSets <- P.ne $ sepBy1 parserRevealSet (string "; ")
   return GameResult {..}
 
 parserRevealSet :: Parser RevealSet
