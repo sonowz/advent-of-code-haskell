@@ -1,11 +1,10 @@
 module Lib.Types where
 
+import Data.Vector qualified as V
 import Relude
-import qualified Data.Vector as V
 
 -- Note: keep this file minimal!
 
 instance One (V.Vector a) where
-    type OneItem (V.Vector a) = a
-    one = V.singleton
-
+  type OneItem (V.Vector a) = a
+  one = V.singleton

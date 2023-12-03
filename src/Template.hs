@@ -37,9 +37,9 @@ solve2 = undefined
 
 main' :: IO ()
 main' = do
-    templates <- parseTemplate <<$>> readFileLines "inputs/Template.txt" :: IO [InputType]
-    print $ solve1 templates
-    -- print $ solve2 template
+  templates <- parseTemplate <<$>> readFileLines "inputs/Template.txt" :: IO [InputType]
+  print $ solve1 templates
+  -- print $ solve2 template
 
 parseTemplate :: Text -> InputType
 parseTemplate = undefined

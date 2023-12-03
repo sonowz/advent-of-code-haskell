@@ -1,17 +1,26 @@
-module Lib.Vector2D where
+module Lib.Vector2D
+  ( Pos2D (..),
+    at,
+    unsafeAt,
+    set,
+    imap2D,
+    imapMaybeL2D,
+    size2D,
+  )
+where
 
-import Relude
-import Data.Vector (Vector, (!?), (!), (//))
-import qualified Data.Vector as V
+import Data.Vector (Vector, (!), (!?), (//))
+import Data.Vector qualified as V
 import Lib.Exception (libExText_)
+import Relude
 
 class Ord pos => Pos2D pos where
-    to2DTuple :: pos -> (Int, Int)
-    from2DTuple :: (Int, Int) -> pos
+  to2DTuple :: pos -> (Int, Int)
+  from2DTuple :: (Int, Int) -> pos
 
 instance Pos2D (Int, Int) where
-    to2DTuple   = id
-    from2DTuple = id
+  to2DTuple = id
+  from2DTuple = id
 
 at :: Pos2D pos => Vector (Vector a) -> pos -> Maybe a
 at v (to2DTuple -> (x, y)) = v !? x >>= flip (!?) y

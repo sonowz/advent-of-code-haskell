@@ -1,43 +1,65 @@
-module Lib.IO where
+module Lib.IO
+  ( readFileLines,
+    readInts,
+    readIntegers,
+    readDoubles,
+    readInt,
+    readInteger,
+    readDouble,
+    printLines,
+    printStrs,
+    showGrid,
+    showMap,
+  )
+where
 
-import Relude
-import Relude.Extra.Map ((!?))
-import Relude.Extra.Bifunctor (bimapBoth)
-import Data.List (minimum, maximum)
+import Data.List (maximum, minimum)
 import Data.Map (assocs)
 import Data.Vector (Vector)
-import qualified Data.Vector as V
+import Data.Vector qualified as V
 import Lib.Exception (libExEither_, libEx_)
-import Lib.Vector2D (Pos2D, to2DTuple, from2DTuple)
+import Lib.Vector2D (Pos2D, from2DTuple, to2DTuple)
+import Relude
+import Relude.Extra.Bifunctor (bimapBoth)
+import Relude.Extra.Map ((!?))
 
 readFileLines :: String -> IO [Text]
 readFileLines filename = lines . decodeUtf8 <$> readFileBS filename -- where
-    -- Remove CR(Carriage Return) character
-    -- clean = filter (/= '\r')
+-- Remove CR(Carriage Return) character
+-- clean = filter (/= '\r')
+
 readInts = readWords_ @Int :: Text -> NonEmpty Int
+
 readIntegers = readWords_ @Integer :: Text -> NonEmpty Integer
+
 readDoubles = readWords_ @Double :: Text -> NonEmpty Double
+
 readInt = libExEither_ . readEither . toString :: Text -> Int
+
 readInteger = libExEither_ . readEither . toString :: Text -> Integer
+
 readDouble = libExEither_ . readEither . toString :: Text -> Double
 
 printLines :: Show a => [a] -> IO ()
 printLines = mapM_ print
+
 printStrs = mapM_ print :: [Text] -> IO ()
 
 showGrid :: Show a => Vector (Vector a) -> String
 showGrid grid = intercalate "\n" . map (intercalate "" . map show) $ grid'
-    where grid' = V.toList $ V.toList <$> grid
+  where
+    grid' = V.toList $ V.toList <$> grid
+
 showMap :: (Ord pos, Pos2D pos, Show a) => Map pos a -> String -> String
-showMap m _default = intercalate "\n" . map (intercalate "") $ list  where
-    xyKeys       = (unzip . map (to2DTuple . fst) $ assocs m) :: ([Int], [Int])
+showMap m _default = intercalate "\n" . map (intercalate "") $ list
+  where
+    xyKeys = (unzip . map (to2DTuple . fst) $ assocs m) :: ([Int], [Int])
     (minX, minY) = minimum `bimapBoth` xyKeys
     (maxX, maxY) = maximum `bimapBoth` xyKeys
     getS pos = maybe _default show (m !? pos)
-    list = [ [ getS (from2DTuple (x, y)) | x <- [minX .. maxX] ] | y <- [minY .. maxY] ]
-
+    list = [[getS (from2DTuple (x, y)) | x <- [minX .. maxX]] | y <- [minY .. maxY]]
 
 -- Private Functions --
 
-readWords_ :: forall  a . Read a => Text -> NonEmpty a
+readWords_ :: forall a. Read a => Text -> NonEmpty a
 readWords_ = fromMaybe libEx_ . nonEmpty . map (libExEither_ . readEither . toString) . words

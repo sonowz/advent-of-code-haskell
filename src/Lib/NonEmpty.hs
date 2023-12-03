@@ -1,9 +1,13 @@
-module Lib.NonEmpty where
+module Lib.NonEmpty
+  ( nfilter,
+    ntake,
+  )
+where
 
-import Relude
+import Data.List.NonEmpty qualified as NE
 import Data.Maybe (fromJust)
-import qualified Data.List.NonEmpty as NE
 import Lib.Exception (libExText_)
+import Relude
 
 nfilter :: (a -> Bool) -> NonEmpty a -> Maybe (NonEmpty a)
 nfilter f = nonEmpty . foldr (\x l -> if f x then x : l else l) []
