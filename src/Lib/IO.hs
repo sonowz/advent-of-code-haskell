@@ -6,6 +6,8 @@ module Lib.IO
     readInt,
     readInteger,
     readDouble,
+    readGrid,
+    readMap,
     printLines,
     printStrs,
     showGrid,
@@ -39,6 +41,15 @@ readInt = libExEither_ . readEither . toString :: Text -> Int
 readInteger = libExEither_ . readEither . toString :: Text -> Integer
 
 readDouble = libExEither_ . readEither . toString :: Text -> Double
+
+readGrid :: (Char -> a) -> [Text] -> Vector (Vector a)
+readGrid parser lines = V.fromList (V.fromList . map parser . toString <$> lines)
+
+readMap :: Pos2D p => [Int] -> [Int] -> (Char -> a) -> [Text] -> Map p a
+readMap xIndices yIndices parser lines = fromList $ do
+  (y, line) <- zip yIndices lines
+  (x, c) <- zip xIndices (toString line)
+  return (from2DTuple (x, y), parser c)
 
 printLines :: Show a => [a] -> IO ()
 printLines = mapM_ print
