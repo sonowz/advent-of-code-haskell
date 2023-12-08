@@ -2,7 +2,7 @@
   description = "Advent of Code Haskell solutions";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
+    nixpkgs.url = "nixpkgs/23.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -13,15 +13,41 @@
         name = "advent-of-code-haskell";
 
         pkgs = nixpkgs.legacyPackages.${system};
-        ghc = pkgs.haskell.packages.ghc925.ghc;  # The version should match with resolver!
+        lib = nixpkgs.lib;
+        haskellPkgs = pkgs.haskell.packages.ghc925; # The version should match with resolver!
+        haskellLib = pkgs.haskell.lib;
+
         requirements = pkgs.callPackage ./requirements.nix {};
         devRequirements = with pkgs; [
           stack-wrapped
           cabal-install
 
-          (haskell-language-server.override { supportedGhcVersions = [ "925" ]; })
-          haskellPackages.ormolu
+          custom-hls
+          haskellPkgs.ormolu
           hlint
+        ];
+
+        custom-hls = lib.trivial.pipe haskellPkgs.haskell-language-server [
+          fastBuild
+          hls925Fix
+          dynamicBuild
+        ];
+        # https://github.com/NixOS/nixpkgs/blob/30d709aa1b9d620351fb457e6ed805a0d4908774/pkgs/development/haskell-modules/configuration-ghc-9.2.x.nix#L76
+        hls925Fix = drv: haskellLib.compose.disableCabalFlag "fourmolu" (drv.override { hls-fourmolu-plugin = null; });
+        fastBuild = drv: drv.overrideScope (hself: hsuper: {
+          mkDerivation = args: hsuper.mkDerivation (args // {
+            doHaddock = false;
+            doCheck = false;
+            doBenchmark = false;
+            doCoverage = false;
+            enableLibraryProfiling = false;
+          });
+        });
+        dynamicBuild = drv: lib.trivial.pipe drv [
+          (haskellLib.compose.overrideCabal (old: {
+            enableSharedExecutables = true;
+          }))
+          (haskellLib.compose.enableCabalFlag "dynamic")
         ];
 
         # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
@@ -51,7 +77,7 @@
         devShell = (pkgs.haskell.lib.buildStackProject {
           inherit name;
           inherit version;
-          inherit ghc;
+          ghc = haskellPkgs.ghc;
           stack = stack-wrapped;
           buildInputs = requirements;
         }).overrideAttrs (final: prev: {
